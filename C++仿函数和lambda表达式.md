@@ -143,6 +143,27 @@ Lambda 表达式的基本形式是
 4. func4 以值传递方式捕获y,z, 以引用传递方式捕获y
 捕获列表的存在简化Lambda表达式调用作用域内变量的过程。
 
+* 例3：在标准库中使用Lambda表达式
+我们已经看过了排序的例子，实际上在标准库中，很多函数提供了Lambda表达式/仿函数接口。在下面的例子中，
+我们将使用std::count_if 函数来统计vector所有大于参数x的元素的个数。
+
+```C++
+#include <vector>
+#include <iostream>
+#include <algorithm>
+
+int count_larger_x(std::vector<int>& vec, int x) {
+    return std::count_if(vec.begin(), vec.end(), [=](int v){return v > x;});
+}
+
+int main(){
+  std::vector<int> vec{1,2,3,4,5,6,7,8};
+  std::cout << count_larger_x(vec, 4);
+  return 0;
+}
+```
+通过此例，我们可以看出Lambda表达式的使用能最大地简化调用函数的代码。
+
 ## 总结
 
 本文介绍了C++中仿函数和Lambda表达式的基本知识：
