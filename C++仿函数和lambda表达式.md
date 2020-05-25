@@ -1,13 +1,94 @@
 # SYCL开发者需要知道的C++特性：仿函数和lambda表达式
 
-SYCL是基于C++11标准设计的。仿函数和lambda表达式在SYCL中被用于定义和使用Kernel函数，
-是任何一个开发者必须使用的工具。这篇文章将帮助你了解这两个C++特性。
+SYCL是基于C++11标准设计的。仿函数和lambda表达式这两项C++新特性在SYCL中被广泛用于定义Kernel函数，
+是开发者必须掌握的工具。这篇文章将帮助你了解这两个C++特性。
 
 ## 仿函数 (Functor)
 在软件开发过程中，我们会遇到一类情况，需要将函数作为参数传递给另外一个函数，比如使用std::sort对自定义的类型
-进行排序。 C++ 为了解决这个问题，增加了仿函数（又叫函数对象， Function Object）机制。
+进行排序。 C语言中的函数指针可以解决这个问题， 但也存在诸多问题。
+C++ 为了进一步解决这个问题，增加了仿函数（又叫函数对象， Function Object）机制。
 
-在实现上，仿函数类重载了 operator()，因此我们可以像函数一样使用它。在下面的例子中，类MyFunctor的operator()被重载，
+**仿函数的本质是一个重载了operator()的类实例。**
+在实现上，仿函数利用运算符()的特性，使我们可以像函数一样使用它。在下面的例子中，类MyFunctor的实例my_functor被用作仿函数：
 
+```C++
+#include <iostream>
 
+class myFunctor
+{
+    public:
+        myFunctor () {}
+        int operator() (int x, int y) { return x + y; }
+};
+
+int main(){
+    myFunctor my_functor;
+    std::cout << my_functor(1,2);
+    return 0;
+}
+```
+在main函数中，对my_functor的调用很像普通函数，但本质上是对opertor()的调用。这也是仿函数这个译名的来源。
+在本例中，我们调用的实际函数逻辑非常简单，仿函数的优势并没有体现出来。一种常见的对仿函数的运用通过增加类的状态，
+来实现相似的功能，比如：
+
+```C++
+#include <iostream>
+
+class myFunctor
+{   
+    private:
+        int base = 0;
+    public:
+        myFunctor (int x) : base(x) {}
+        int operator() (int x, int y) { return x + y + base; }
+};
+
+int main(){
+    myFunctor my_functor_1(2);
+    myFunctor my_functor_2(10);
+    std::cout << my_functor_1(1,2) << std::endl;
+    std::cout << my_functor_2(1,2) << std::endl;
+    return 0;
+}
+```
+此例中，我们在myFunctor加入了成员变量base。在不同实例中，base的值不一样，因此其相应的仿函数行为也不一样。
+这样只定义一个类，我们通过
+对不同试例传入不同参数，可以得到不同的函数。下面我们再看一个常见的例子，使用仿函数定义排序中的比较函数：
+
+```C++
+#include <vector>
+#include <iostream>
+#include <algorithm>
+
+struct Student {
+  int age;
+  Student(int x): age(x) {}
+};
+
+struct MyCompare { 
+   bool operator()(const Student &a, const Student &b) {
+       return a.age < b.age;
+   }
+};
+
+int main(){
+  std::vector<Student> vecStudent{{1}, {3}, {2}};
+  MyCompare comparitor;
+  std::sort(vecStudent.begin(), vecStudent.end(), comparitor);
+  std::cout << vecStudent[1].age;
+  return 0;
+}
+```
+
+标准库函数std::sort提供了接口通过仿函数的方式传入自定义类型的比较函数。因为我们只使用了comparitor实礼一次，我们可以在调用std::sort时
+同时创建实例：
+```C++
+  // Simplify Code:
+  // MyCompare comparitor;
+  // std::sort(vecStudent.begin(), vecStudent.end(), comparitor);
+  // To:
+  std::sort(vecStudent.begin(), vecStudent.end(), MyCompare{});
+```
+
+## Lambda 表达式
 
