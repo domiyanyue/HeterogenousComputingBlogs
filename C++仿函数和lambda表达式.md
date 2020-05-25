@@ -91,22 +91,21 @@ int main(){
 ```
 
 ## Lambda 表达式
-Lambda 表达式机制是对仿函数在语法上的进一步的简化。Lambda表达式的返回值是一个仿函数，使用Lambda表达式（在函数只使用一次时）可以简化代码。
-重新考察一下之前的排序代码例子，很多代码的存在只是为了语法的完整性，但并非我们实际所需。比如类MyCompare的定义，对运算符()重载的声明，以及对实例comparitor的创建。Lamdba表达式简化了在使用仿函数的过程中的非必要代码，之前的排序代码可以表达为：
+Lambda 表达式机制是对仿函数在语法上的进一步的简化。Lambda表达式的返回值是一个仿函数。
+重新考察一下之前的排序代码例子，很多代码的存在只是为了语法的完整性，但并非我们实际所需。比如类MyCompare的定义，对运算符()重载的声明，以及对实例comparitor的创建。Lamdba表达式简化了非必要代码，之前的排序代码可以表达为：
 ```C++
-// use functor
-// struct MyCompare { 
-//   bool operator()(const Student &a, const Student &b) {
-//       return a.age < b.age;
-//   }
-//};
-//...
-//  MyCompare comparitor;
-//  std::sort(vecStudent.begin(), vecStudent.end(), comparitor);
-//
 // use lambda expression
 std::sort(vecStudent.begin(), vecStudent.end(), [](const Student &a, const Student &b) { return a.x < b.y; });
 // or 
 auto comparitor = [](const Student &a, const Student &b) { return a.x < b.y; };
 std::sort(vecStudent.begin(), vecStudent.end(), comparitor);
 ```
+Lambda 表达式的基本形式是
+```
+[ captures ] (parameters) -> returnTypesDeclaration { lambdaStatements; }
+```
+其中：
+* **\[captures\]** ：捕获列表，用于指定外部变量是如何传入（值传递，引用传递）lambda函数的。空列表[]表示lambda函数不会访问外部变量。捕获列表在声明lambda表达式时必需存在，不能省略。
+* **(parameters)** : 参数列表，类似一般函数的参数列表，当参数数量为0时可以省略。
+* **returnTypesDeclaration** ：返回值类型，在编译器可以推测出返回值类型时可以省略。 
+* **{ lambdaStatemetns; }** : 表达式函数体，可以访问捕获列表和参数列表中的变量。
