@@ -89,7 +89,7 @@ int main(){
   // To:
   std::sort(vecStudent.begin(), vecStudent.end(), MyCompare{});
 ```
-然而，为了实现一个比较函数去创建类并重载运算符的方式称不上简洁，这就催生了Lambda表达式的诞生。
+然而，为了实现一个比较函数去创建类并重载运算符的方式并不简洁，这就催生了Lambda表达式的诞生。
 
 ## Lambda 表达式
 Lambda 表达式机制是对仿函数在语法上的进一步的简化。**Lambda表达式的返回值就是一个仿函数。**
