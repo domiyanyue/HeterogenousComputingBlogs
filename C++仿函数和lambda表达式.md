@@ -1,15 +1,15 @@
 # SYCL开发者需要知道的C++特性：仿函数和lambda表达式
 
 SYCL是基于C++11标准设计的。仿函数和lambda表达式这两项C++新特性在SYCL中被广泛用于定义kernel函数，
-是开发者必须掌握的工具。这篇文章将帮助你了解这两个C++特性的基本运用。
+是开发者必须掌握的工具。这篇文章将帮助你了解这两个C++特性。
 
 ## 仿函数 (Functor)
-在软件开发过程中，我们会遇到一类情况，需要将函数作为参数传递给另外一个函数，比如使用std::sort对自定义的类型
-进行排序。 C语言中的函数指针可以解决这个问题， 但也存在诸多问题。
-C++ 为了进一步解决这个问题，增加了仿函数（又叫函数对象， Function Object）机制。
+在软件开发过程中，我们会遇到一类情况，需要将函数作为参数传递给另外一个函数，比如使用std::sort对自定义类型进行排序。
+C语言中的函数指针可以解决这个问题， 但存在诸多问题。C++ 为了进一步解决这个问题，增加了仿函数（又叫函数对象， Function Object）机制。
 
-**仿函数的本质是一个重载了operator()的类实例。**
-在实现上，仿函数利用运算符()，使我们可以像函数一样使用它。在下面的例子中，类MyFunctor的实例my_functor被用作仿函数：
+**仿函数的本质是一个重载了运算符()的类的实例。**
+在实现上，仿函数利用运算符()，使它可以像函数一样被调用。
+在下面的例子中，我们定义了类MyFunctor， 并创建实例my_functor作为仿函数：
 
 ```C++
 #include <iostream>
@@ -27,9 +27,9 @@ int main(){
     return 0;
 }
 ```
-在main函数中，对my_functor的调用很像普通函数，但本质上是对opertor()的调用。这也是“仿函数”这个译名的来源。
-在本例中，我们调用的实际函数逻辑非常简单，仿函数并没有体现出任何优势。一种常见的对仿函数的运用是通过增加类的状态，
-来实现相似的功能，比如：
+在main函数中，对my_functor的调用很像普通函数，本质上是对opertor()的调用。这也是“仿函数”这个译名的来源。
+在本例中，我们调用的实际函数逻辑非常简单，仿函数并没有体现出优势。一种常见的对仿函数的运用是通过增加类的状态，
+来实现相似但不同的功能，比如：
 
 ```C++
 #include <iostream>
@@ -89,18 +89,19 @@ int main(){
   // To:
   std::sort(vecStudent.begin(), vecStudent.end(), MyCompare{});
 ```
+然而，为了实现一个比较函数去创建类并重载运算符的方式称不上简洁，这就催生了Lambda表达式的诞生。
 
 ## Lambda 表达式
-Lambda 表达式机制是对仿函数在语法上的进一步的简化。Lambda表达式的返回值是一个仿函数。  
-重新考察一下之前的排序代码例子，很多代码的存在只是为了语法的完整性，但并非我们实际所需。比如类MyCompare的定义，对运算符()重载的声明，以及对实例comparitor的创建。Lamdba表达式简化了非必要代码，之前的排序代码可以表达为：
+Lambda 表达式机制是对仿函数在语法上的进一步的简化。**Lambda表达式的返回值就是一个仿函数。**
+重新阅读一下之前的排序代码例子，很多代码的存在只是为了语法的完整性，但并非我们实际所需。
+比如类MyCompare的定义，对运算符()重载的声明，以及对实例comparitor的创建。Lamdba表达式能简化非必要代码，之前的排序代码可以重写为：
 ```C++
-// use lambda expression
+// 使用 lambda 表达式
 std::sort(vecStudent.begin(), vecStudent.end(), [](const Student &a, const Student &b) { return a.x < b.y; });
-// or 
+// 或
 auto comparitor = [](const Student &a, const Student &b) { return a.x < b.y; };
 std::sort(vecStudent.begin(), vecStudent.end(), comparitor);
 ```
-Lambda 表达式在创建和使用仅需要使用一次的函数时非常方便，相比之下仿函数更方便多次复用。
 
 Lambda 表达式的基本形式是
 ```
@@ -121,7 +122,7 @@ Lambda 表达式的基本形式是
 ```C++
     auto comparitor = [](const Student &a, const Student &b) -> bool { return a.x < b.x; };
 ```
-这里有一个细节，Lambda表达式的返回值的类型是不能直接指定并由编译器在编译时时生成。开发者只需要使用 auto 来指定其类型。
+这里有一个细节，Lambda表达式的返回值的类型是不能直接指定并由编译器在编译时时生成。开发者需要使用 auto来指定其类型。
 
 * 例2：捕获列表的基本使用
 在这个例子中，我们将看到如何对外部变量以值传递或引用传递的方式进行捕获。
@@ -129,14 +130,14 @@ Lambda 表达式的基本形式是
     int x = 1;
     int y = 2;
     int z = 3;
-    auto func1 = [&](){};    // (1), default capture by reference
-    auto func2 = [=](){};    // (2), default capture by copy
-    auto func3 = [&,x](){};  // (3), default capture by reference, except x by copy
-    auto func4 = [=,&x](){}; // (4), default capture by copy, excep x by reference
+    auto func1 = [&](){return x + y + z;};    // (1), 默认捕获为引用传递
+    auto func2 = [=](){return x + y + z;};    // (2), 默认捕获为值传递
+    auto func3 = [&,x](){return x + y + z;};  // (3), 默认捕获为引用传递, x为值传递
+    auto func4 = [=,&x](){return x + y + z;}; // (4), 默认捕获为值传递, x为引用传递
 ```
 在例(1)和(2) 我们分别使用了&和=来指定**默认捕获**方式为**引用传递**和**值传递**。
-默认捕获方式将作用于有所有没有显式指定传值方式的变量（包括this指针）。另外我们可以通过
-&var或var 以**显示**得指定变量var传值方式为医用传递或值传递。在以上例子中：
+**默认捕获方式将作用于有所有没有显式指定传值方式的变量（包括this指针）**。另外我们可以通过
+**&var或var 以显示得指定变量var传值方式**为医用传递或值传递。在以上例子中：
 1. func1 以引用传递的方式捕获x,y,z
 2. func2 以值传递的方式捕获x,y,z
 3. func3 以引用传递方式捕获y,z，以值传递方式捕获x
@@ -162,7 +163,8 @@ int main(){
   return 0;
 }
 ```
-通过此例，我们可以看出Lambda表达式的使用能最大地简化调用函数的代码。
+通过此例，我们可以看出Lambda表达式的使用能极大程度地简化调用函数的代码。
+Lambda 表达式在创建和使用仅需要使用一次的函数时非常方便。相比之下用类定义仿函数的方式便利于多次复用。
 
 ## 总结
 
