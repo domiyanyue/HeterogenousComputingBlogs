@@ -28,7 +28,7 @@ int main(){
 }
 ```
 在main函数中，对my_functor的调用很像普通函数，但本质上是对opertor()的调用。这也是“仿函数”这个译名的来源。
-在本例中，我们调用的实际函数逻辑非常简单，仿函数并没有体现出任何优势。一种常见的对仿函数的运用时通过增加类的状态，
+在本例中，我们调用的实际函数逻辑非常简单，仿函数并没有体现出任何优势。一种常见的对仿函数的运用是通过增加类的状态，
 来实现相似的功能，比如：
 
 ```C++
@@ -80,7 +80,7 @@ int main(){
 }
 ```
 
-标准库函数std::sort提供了接口通过仿函数的方式传入自定义类型的比较函数。因为我们只使用了comparitor实礼一次，我们可以在调用std::sort时
+标准库函数std::sort提供了接口通过仿函数的方式传入自定义类型的比较函数。我们也可以在调用std::sort时
 同时创建实例：
 ```C++
   // Simplify Code:
@@ -100,7 +100,7 @@ std::sort(vecStudent.begin(), vecStudent.end(), [](const Student &a, const Stude
 auto comparitor = [](const Student &a, const Student &b) { return a.x < b.y; };
 std::sort(vecStudent.begin(), vecStudent.end(), comparitor);
 ```
-Lambda 表达式在创建和使用仅需要利用一次的函数时非常方便，相比之下仿函数更方便多次复用。
+Lambda 表达式在创建和使用仅需要使用一次的函数时非常方便，相比之下仿函数更方便多次复用。
 
 Lambda 表达式的基本形式是
 ```
@@ -141,7 +141,7 @@ Lambda 表达式的基本形式是
 2. func2 以值传递的方式捕获x,y,z
 3. func3 以引用传递方式捕获y,z，以值传递方式捕获x
 4. func4 以值传递方式捕获y,z, 以引用传递方式捕获y
-捕获列表的存在简化Lambda表达式调用作用域内变量的过程。开发者不需要将所有需要传入的变量声明为参数并赋予新的名称。
+捕获列表的存在简化Lambda表达式调用作用域内变量的过程。
 
 ** 总结
 
