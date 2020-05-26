@@ -46,8 +46,8 @@ class myFunctor
 int main(){
     myFunctor my_functor_1(2);
     myFunctor my_functor_2(10);
-    std::cout << my_functor_1(1,2) << std::endl;
-    std::cout << my_functor_2(1,2) << std::endl;
+    std::cout << my_functor_1(1,2) << std::endl; // output 5
+    std::cout << my_functor_2(1,2) << std::endl; // output 13
     return 0;
 }
 ```
