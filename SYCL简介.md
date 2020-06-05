@@ -147,7 +147,9 @@ Notice in the code there is a scope `{}` around buffers. This scope defines the 
          }); // 指令组 (command group)结束
       });
 ```
-在本例中，命令组(command group)包含两部分，
+命令组(command group)包含两部分：
+* **内核函数(kernel function)** : 内核函数以仿函数(functor)的形式存在于enqueue API `parallel_for`中。在下文中我们将介绍函数的组成。
+* **输入和输出(inputs and outputs)** ：内核函数的输入输出由**存取器(accessor)** 定义，存取器在内核函数中用于访问内存。下文中将单独介绍存取器。
 
 A command group is a single unit of work that will be executed on the device. You can see the command group
 is passed as a functor (function object) parameter to to `submit` function. It accepts a parameter `handler` constructed by SYCL runtime which gives users the ability to access command group scope APIs. 
@@ -164,7 +166,7 @@ is passed as a functor (function object) parameter to to `submit` function. It a
          }); // end of command group
       });
 ```
-In this case, the command group consists of a kernel function (defined by a kernel function enqueue API `parallel_for` which we will introduce later) and inputs and outputs defined by **accessor** object initialized by `get_access` API. 
+In this case, the command group consists of a kernel function (defined by a kernel function enqueue API `parallel_for` which we will introduce later) and inputs and outputs defined by **accessor** object initialized by `get_access` API. I will cover kernel function and accessor in the following content.
 
 ### Construct Command Queue and Submit Command Group
 ```C++
