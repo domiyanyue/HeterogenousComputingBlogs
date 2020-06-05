@@ -99,23 +99,30 @@ SYCL 程序必须包含 `CL/sycl.hpp`。其中包括了SYCL运行时需要的变
 SYCL applications must include `CL/sycl.hpp` which contains APIs for SYCL runtime types like queue, buffer, device, etc. They all live under `cl::sycl` namespace. For the simplicity of this example, we put `using namespace` command at the beginning of the file.
 
 
-### 选择设备
+### 选择设备(device)
 ### Select Device
 ```C++
 default_selector device_selector;
 ```
-这一行代码声明并初始化了**设备选择器(device selector)** 。设备选择器用于指定SYCL程序运行的硬件。SYCL内置了一些类型，其中包括`cpu_selector`, `host_selector`, `host_selector` 和 `default_selector.` SYCL支持开发者定制的设备选择器来支持不同的硬件。本例中，我们使用 `default_selector`，SYCL运行时将自动决定使用的设备。
+这一行代码声明并初始化了**设备选择器(device selector)** 。设备选择器用于指定SYCL程序运行的硬件。SYCL内置了一些类型，其中包括`cpu_selector`, `host_selector`, `host_selector` 和 `default_selector.` SYCL支持开发者定制的设备选择器来支持不同的硬件。本例中，我们使用类型 `default_selector`，SYCL运行时将自动决定使用的设备。
 
 This is how you specify the device (CPU, GPU, FPGA, etc) to execute on. SYCL provides a `default_selector` that will select an existing device in the system. SYCL also provides `cpu_selector`, `gpu_selector`, and allow you to customize your selector. In this example, we choose `default_selector` which let runtime picks for us.
 
+### 创建缓冲区(buffer)
 ### Setup Buffers
 ```C++
 {
       buffer<float, 1> a_sycl(vec_a.data(), ArraySize);
       buffer<float, 1> b_sycl(vec_b.data(), ArraySize);
       buffer<float, 1> c_sycl(vec_c.data(), ArraySize);
+      . . .
 }
 ```
+缓冲区(buffer)是SYCL引入的类型，用来表示在主机端(host)和设备端(device)间共享的内存。本例中，我们使用两个参数实例化了模板类buffer: 变量类型 `float` 和数据维度 `1` 。在buffer构造函数中，我们传入了数据源和数据量(ArraySize)。buffer类型支持直接从`std::vector`或`C数组`中传入数据。
+这段代码的第一行，我们创建了一个一维浮点数大小为`ArraySize`的缓冲区，并用`vec_a`中的数据进行了初始化。
+
+
+
 In SYCL, a buffer is used to maintain an area of memory that can be shared between the host and one or more devices. Here we instantiate a **buffer type** with two *template parameters*: data type `float` and data dimension `1`. We also construct a **buffer instance** with two arguments: the first is the data source and the second one is the number of elements. SYCL provides interfaces for constructing buffers from different types of data sources like `std::vector` or `C arrays`.  
 In the first line of this example, we create a 1-dimensional buffer object of containing element `float` of size `ArraySize` and initialized it with data in `vec_a`. 
 
