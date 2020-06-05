@@ -1,14 +1,22 @@
+# SYCL 简介
 
-# Introduction to SYCL
-
+欢迎来到我的SYCL教程！ SYCL 是一门使用单一源代码的基于OpenCL实现的异构平台编程框架。SYCL的发明使得开发者可以完全使用C++语言开发在异构系统中开发。
+如果你对OpenCL很熟悉，你即将发现SYCL中的概念十分相似，可以把关注点放在SYCL的新特性上。对OpenCL不熟悉的学习者也不必担心，这部教程不需要OpenCL知识作为学习基础。
 Welcome to my SYCL tutorial! SYCL is a single source heterogeneous programming model built on top of OpenCL that allows programmers to write heterogeneous application completely using C++. If you are familiar with OpenCL, the concepts in this tutorial should be familiar to you and you can focus on what's new in SYCL. If you are not, don't worry, this won't require any background knowledge in OpenCL. 
 
+## 背景知识
 ## A Brief Background 
+
+机构计算系统是指使用多种处理器架构的计算系统，其处理器组合可以是CPU + GPU, CPU + FPGA, CPU + DSP等。开发者对异构系统编程需要基于异构编程模型（包含编程语言），包括OpenCL, CUDA, OpenACC等。OpenCL在其中被广泛使用的，得益于它定义清晰的编程模型和易款平台迁移的优点。但是OpenCL有3点重要缺陷：
 Heterogenous computing refers to systems that use more than one kind of processor (CPU + GPU, CPU + FPGA, CPU + DSP, etc.). To make programming for heterogeneous systems easy, people have come up with different programming models including OpenCL, CUDA, OpenACC, etc. 
 OpenCL is one of the widely adopted one. It has a well-defined execution model that is portable across all types of devices. 
 However, OpenCL received three major complaints:
+
+1. 受限制的C++语言支持。OpenCL 是基于C99的语言，开发者们无法在其中使用现代C++的特性。
+2. 主机端(host)程序和设备端(device)程序的弱耦合机制让OpenCL开发过程十分容易出错。开发者需要使用两种不同语言进行开发并且分别编译，通常，开发者会编写一些语言生成脚来去主机端和设备端的共享代码从而简化开发过程。
+3. 
 1. Limited support for C++. Developers do not benefit from new features in modern C++.  
-2. The weak link between the host and device code is error-prone. Developers have to write in 2 different languages and compile host and device parts using different compilers. Often, users have to write their stringify script to automate the development process.
+2. The weak link between the host and device code is error-prone. Developers have to write in 2 different languages and compile host and device parts using different compilers. Often, users have to write their stringify script for purpose like code generation to automate the development process.
 3. OpenCL is too verbose for many developers who don't want to explicitly write every low-level operation like memory transaction between host and device.
 
 SYCL was born reactive to OpenCL's pros and cons and aimed at a better heterogeneous framework.
