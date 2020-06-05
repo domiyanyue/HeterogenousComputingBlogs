@@ -210,20 +210,31 @@ queue specifying the device it will submit to. Then we submit a command group to
 ### 实现内核函数(Kernel Function)
 ### Write Kernel Function
 
-
+内核函数由三部分组成：数据并行模型(data parallel model), 函数体(function body)以及内核名(kernel name).  
 A kernel function is defined with 3 parts: data parallel model, kernel function body and kernel name. 
 ```C++
          cgh.parallel_for<class VectorAdd>(range<1>(ArraySize), [=] (item<1> item) {
             c_acc[item] = a_acc[item] + b_acc[item];
          });
 ```
+
+* 数据并行模型: 据并行模型由代码中的`parallel_for`和参数`range`的类型共同决定。本例中，数据并行模型是**基本数据并行模型(basic data parallel model)** ，这类模型将执行多个相互间不同部的 **工作项/线程(work-item/thread)** 。其他的数据并行模型包括**工作组数据并行(work-group data parallel)**, **单任务(single task)**, **等级制数据并行(hierarchical data parallel)**.
+
+* 函数体: 函数体由仿函数(functor)形式表达，
+
+* 内核名：内核名称由`class VectorAdd` 定义。这里需要注意，内核名是一个类名，并需要在全局范围内声明。
+
+
 In this example, data parallel model is defined by `parallel_for` API and `range` argument's type. Combined, they indicates the kernel will follow basic data parallel model which execute as multiple **work-items (threads)**. Other data parallel models are work-group data parallel, single task, and hierarchical data parallel.  
 
 The kernel function body is encapsulated as a function object. It accepts an `item` as argument instructed by basic data parallel model. Inside the kernel function body, we add value from buffer `a_sycl` and `b_sycl` and save the result in `c_sycl` through accessors. Kernel argument `item` is **work-item id** (think of it as thread id) which tells the kernel that each execution of instance only add the value at **work-item id** position. Together, all threads will run in parallel to finish the work.
 
 Kernel name is marked with `class VectorAdd`. Notice, it it a type and must be a class declared in global scope. 
 
+
+## 总结
 ## Summary
+
 
 In this tutorial, we studied a "vector add" which includes basic elements of a SYCL program:
 * Declare a SYCL queue object associated with certain devices.
