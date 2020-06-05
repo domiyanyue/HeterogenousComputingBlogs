@@ -121,16 +121,36 @@ This is how you specify the device (CPU, GPU, FPGA, etc) to execute on. SYCL pro
 缓冲区(buffer)是SYCL引入的类型，用来表示在主机端(host)和设备端(device)间共享的内存。本例中，我们使用两个参数实例化了模板类buffer: 变量类型 `float` 和数据维度 `1` 。在buffer构造函数中，我们传入了数据源和数据量(ArraySize)。buffer类型支持直接从`std::vector`或`C数组`中传入数据。
 这段代码的第一行，我们创建了一个一维浮点数大小为`ArraySize`的缓冲区，并用`vec_a`中的数据进行了初始化。
 
-
+这里需要注意的一点是buffer所在的作用域`{}`。在完整代码中`{`在buffer声名之前，`}`出现在打印结果前。作用域定义了`buffer`的存在区域(lifespan)。buffer在创建时被初始化，接管了vector中的数据。当代码执行到`}`时，buffer的析构函数(destructor)会自动将处理后的数据复制回`vec_a, vec_b, vec_c`中。
+内存在主机端和设备端的转移是有buffer的构造函数和析构函数隐式的控制的。
 
 In SYCL, a buffer is used to maintain an area of memory that can be shared between the host and one or more devices. Here we instantiate a **buffer type** with two *template parameters*: data type `float` and data dimension `1`. We also construct a **buffer instance** with two arguments: the first is the data source and the second one is the number of elements. SYCL provides interfaces for constructing buffers from different types of data sources like `std::vector` or `C arrays`.  
 In the first line of this example, we create a 1-dimensional buffer object of containing element `float` of size `ArraySize` and initialized it with data in `vec_a`. 
 
 Notice in the code there is a scope `{}` around buffers. This scope defines the life-span of buffer. When the buffer is constructed inside the scope, it automatically gets the ownership of the data. When the buffer goes out of scope, it copies data back to `vec_a`, `vec_b` and `vec_c`. The memory movement between host and device is handled implicitly in the buffer's constructor and destructor. 
 
+### 构造命令组(command group)
 ### Create Command Group
+
+命令组(command group)是一组在设备端运行的代码，在本例中，指令组以仿函数 (functor)的形式传入`submit`函数。指令组的仿函数接受
+
+```C++
+      queue.submit([&] (handler& cgh) { // 指令组 (command group) 开始
+         // inputs and outputs accessor
+         auto a_acc = a_sycl.get_access<access::mode::read>(cgh);
+         auto b_acc = b_sycl.get_access<access::mode::read>(cgh);
+         auto c_acc = c_sycl.get_access<access::mode::write>(cgh);
+     
+         // kernel function enqueue API `parallel_for`
+         cgh.parallel_for<class VectorAdd>(range<1>(ArraySize), [=] (item<1> item) {
+            c_acc[item] = a_acc[item] + b_acc[item];
+         }); // 指令组 (command group)结束
+      });
+```
+
+
 A command group is a single unit of work that will be executed on the device. You can see the command group
-is passed as a functor (function object) parameter to to `submit` function. It also accepts a parameter `handler` constructed by SYCL runtime which gives users the ability to access command group scope APIs. 
+is passed as a functor (function object) parameter to to `submit` function. It accepts a parameter `handler` constructed by SYCL runtime which gives users the ability to access command group scope APIs. 
 ```C++
       queue.submit([&] (handler& cgh) { // start of command group
          // inputs and outputs accessor
