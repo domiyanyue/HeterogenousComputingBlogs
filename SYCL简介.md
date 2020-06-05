@@ -2,6 +2,7 @@
 
 欢迎来到我的SYCL教程！ SYCL 是一门使用单一源代码的基于OpenCL实现的异构平台编程框架。SYCL的发明使得开发者可以完全使用C++语言开发在异构系统中开发。
 如果你对OpenCL很熟悉，你即将发现SYCL中的概念十分相似，可以把关注点放在SYCL的新特性上。对OpenCL不熟悉的学习者也不必担心，这部教程不需要OpenCL知识作为学习基础。
+
 Welcome to my SYCL tutorial! SYCL is a single source heterogeneous programming model built on top of OpenCL that allows programmers to write heterogeneous application completely using C++. If you are familiar with OpenCL, the concepts in this tutorial should be familiar to you and you can focus on what's new in SYCL. If you are not, don't worry, this won't require any background knowledge in OpenCL. 
 
 ## 背景知识
@@ -195,15 +196,21 @@ queue specifying the device it will submit to. Then we submit a command group to
          auto c_acc = c_sycl.get_access<access::mode::write>(cgh);
 ```
 
-`<缓冲区变量>.get_access` 函数的返回存取器可以访问这个缓冲区。
-
+获取访问某个缓冲区的常用方式是`<缓冲区变量>.get_access` ，该函数将返回一个存取器。存取器有三个重要的属性：
+1. **缓冲区**：可以访问的内存，在创建时指定。
+2. **存取方式**：以模板参数的形式传入，常见的值包括read, write, read_write。存取方式有助于编译器优化内存访问。
+3. **命令组handler**: 参数`cgh`表示存取器可以在这个命令组(command group)中的内核函数中(kernel function)使用。
 
 `<buffer>.get_access` returns accessor and gives it access to formerly created **buffer** objects `(a_sycl, b_sycl, c_sycl)`. For every accessor, there are three basic attributes:
 1. **buffer**: memory it access which is determined when created. 
 2. **access mode**: passed as template parameter. Typical values are read, write, read_write. This gives hints to the compiler to optimize the implementation. 
 3. **command group handler**: the argument `cgh` indicates that the accessor will be available in kernel within this command group scope.
 
+
+### 实现内核函数(Kernel Function)
 ### Write Kernel Function
+
+
 A kernel function is defined with 3 parts: data parallel model, kernel function body and kernel name. 
 ```C++
          cgh.parallel_for<class VectorAdd>(range<1>(ArraySize), [=] (item<1> item) {
