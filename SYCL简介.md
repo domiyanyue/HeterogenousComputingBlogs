@@ -168,6 +168,7 @@ is passed as a functor (function object) parameter to to `submit` function. It a
 ```
 In this case, the command group consists of a kernel function (defined by a kernel function enqueue API `parallel_for` which we will introduce later) and inputs and outputs defined by **accessor** object initialized by `get_access` API. I will cover kernel function and accessor in the following content.
 
+### 创建命令队列(command queue)并提交命令组(command group)
 ### Construct Command Queue and Submit Command Group
 ```C++
 ...
@@ -176,11 +177,16 @@ In this case, the command group consists of a kernel function (defined by a kern
     ...
     }
 ```
+命令队列(command queue)在SYCL中用于向设备端提交命令组(command group)。上例中，我们定义了一个`queue`实例并传入`device_selectr`作为设备参数。
+下一行中，指令组被提交(submit)，SYCL中的命令队列提交是异步操作，这行代码在执行时会立即返回，命令组随后会在设备端运行。
+
 A SYCL **queue** submits and triggers execution of **command group(s)** on a certain device. In this example, We first construct a
 queue specifying the device it will submit to. Then we submit a command group to the device asynchronously. The submit command will return immediately and the execution of the command group will start later.
 
+### 使用存取器(accessor)
 ### Specify Accessors
 
+**存取器(accessor)** 是SYCL中专门用于访问缓冲区(buffer)的类型。本例中，它们在命令组(command group)中使用来访问缓冲区中的全局内存(global memory)。
 **accessor** is the class to access buffer in SYCL. In this example, they are declared in command group to specify inputs and outputs from/to global memory.
 
 ```C++
@@ -188,6 +194,10 @@ queue specifying the device it will submit to. Then we submit a command group to
          auto b_acc = b_sycl.get_access<access::mode::read>(cgh);
          auto c_acc = c_sycl.get_access<access::mode::write>(cgh);
 ```
+
+`<缓冲区变量>.get_access` 函数的返回存取器可以访问这个缓冲区。
+
+
 `<buffer>.get_access` returns accessor and gives it access to formerly created **buffer** objects `(a_sycl, b_sycl, c_sycl)`. For every accessor, there are three basic attributes:
 1. **buffer**: memory it access which is determined when created. 
 2. **access mode**: passed as template parameter. Typical values are read, write, read_write. This gives hints to the compiler to optimize the implementation. 
