@@ -14,15 +14,22 @@ However, OpenCL received three major complaints:
 
 1. 受限制的C++语言支持。OpenCL 是基于C99的语言，开发者们无法在其中使用现代C++的特性。
 2. 主机端(host)程序和设备端(device)程序的弱耦合机制让OpenCL开发过程十分容易出错。开发者需要使用两种不同语言进行开发并且分别编译，通常，开发者会编写一些语言生成脚来去主机端和设备端的共享代码从而简化开发过程。
-3. 
+3. OpenCL是一门低级语言(Low level language), 需要开发者显示的表达主机端与设备端内存传输等低级操作。这使得代码变得冗长。
 1. Limited support for C++. Developers do not benefit from new features in modern C++.  
 2. The weak link between the host and device code is error-prone. Developers have to write in 2 different languages and compile host and device parts using different compilers. Often, users have to write their stringify script for purpose like code generation to automate the development process.
 3. OpenCL is too verbose for many developers who don't want to explicitly write every low-level operation like memory transaction between host and device.
 
+SYCL的设计在保留了OpenCL优点的同时，解决了OpenCL的以上问题：
+1. 继承了OpenCL易迁移的执行模型。
+2. 前端语言完全基于C++设计。
+3. 使用了单一源代码的编程模型，开发者无需对主机端和设备端代码区别对待。
+4. SYCL扩展了基于OpenCL的编程模型，让开发者可以用更高级的抽象概念编程。
+
 SYCL was born reactive to OpenCL's pros and cons and aimed at a better heterogeneous framework.
 1. It inherited the good execution model of OpenCL.
 2. SYCL is purely based on C++. 
-3. SYCL is a single source (no separation of device and host) programming model that allows developers to express at a high level of abstraction.            
+3. SYCL is a single source (no separation of device and host) programming model.
+4. SYCL extends the programming model that allows developers to express at a high level of abstraction.            
 
 ## What Does SYCL Look Like? 
 I will lead you through a simple SYCL code sample performing vector add. This will give you an idea of the structure of a SYCL application. Please don't pay too much attention to details but focus on the higher level concepts. Here is the code:
