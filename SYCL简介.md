@@ -132,7 +132,7 @@ Notice in the code there is a scope `{}` around buffers. This scope defines the 
 ### 构造命令组(command group)
 ### Create Command Group
 
-命令组(command group)是一组在设备端运行的代码，在本例中，指令组以仿函数 (functor)的形式传入`submit`函数。指令组的仿函数接受
+命令组(command group)是一组在设备端运行的代码，在本例中，指令组以仿函数 (functor)的形式传入`submit`函数。指令组的仿函数需要接受参数`handler`，`handler` 由SYCL运行时创建，开发者将使用他来访问命令组(command group)中的程序接口(API)。
 
 ```C++
       queue.submit([&] (handler& cgh) { // 指令组 (command group) 开始
@@ -147,7 +147,7 @@ Notice in the code there is a scope `{}` around buffers. This scope defines the 
          }); // 指令组 (command group)结束
       });
 ```
-
+在本例中，命令组(command group)包含两部分，
 
 A command group is a single unit of work that will be executed on the device. You can see the command group
 is passed as a functor (function object) parameter to to `submit` function. It accepts a parameter `handler` constructed by SYCL runtime which gives users the ability to access command group scope APIs. 
