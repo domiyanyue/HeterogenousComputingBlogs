@@ -104,8 +104,7 @@ SYCL applications must include `CL/sycl.hpp` which contains APIs for SYCL runtim
 ```C++
 default_selector device_selector;
 ```
-
-
+这一行代码声明并初始化了**设备选择器(device selector)** 。设备选择器用于指定SYCL程序运行的硬件。SYCL内置了一些类型，其中包括`cpu_selector`, `host_selector`, `host_selector` 和 `default_selector.` SYCL支持开发者定制的设备选择器来支持不同的硬件。本例中，我们使用 `default_selector`，SYCL运行时将自动决定使用的设备。
 
 This is how you specify the device (CPU, GPU, FPGA, etc) to execute on. SYCL provides a `default_selector` that will select an existing device in the system. SYCL also provides `cpu_selector`, `gpu_selector`, and allow you to customize your selector. In this example, we choose `default_selector` which let runtime picks for us.
 
