@@ -35,6 +35,7 @@ SYCL was born reactive to OpenCL's pros and cons and aimed at a better heterogen
 ## What Does SYCL Look Like?
 
 在这部分中，我们将通过一个向量加法应用的例子来了解SYCL应用的结构。在学习中，请将重点放在程序的总体架构上而不要纠结于实例代码中包含的诸多SYCL语言细节。 下面是完整的代码：
+
 I will lead you through a simple SYCL code sample performing vector add. This will give you an idea of the structure of a SYCL application. Please don't pay too much attention to details but focus on the higher level concepts. Here is the code:
 
 ```C++
@@ -81,19 +82,31 @@ int main() {
 }
 
 ```
+下面我们会对代码中的基本单元进行一一解读：
+
 Let's break it down to the basic build blocks of a SYCL application:
+
+### 使用SYCL头文件
 ### Include Header Files
 ```C++
 #include <CL/sycl.hpp>
 
 using namespace cl::sycl;
 ```
+
+SYCL 程序必须包含 `CL/sycl.hpp`。其中包括了SYCL运行时需要的变量类型定义，包括queue, buffer, device 等。SYCL运行时类型定于都在命名空间 `cl::sycl `中。在本例中，为了代码的简介，我们加入了 `using namespace cl::sycl`.
+
 SYCL applications must include `CL/sycl.hpp` which contains APIs for SYCL runtime types like queue, buffer, device, etc. They all live under `cl::sycl` namespace. For the simplicity of this example, we put `using namespace` command at the beginning of the file.
 
+
+### 选择设备
 ### Select Device
 ```C++
 default_selector device_selector;
 ```
+
+
+
 This is how you specify the device (CPU, GPU, FPGA, etc) to execute on. SYCL provides a `default_selector` that will select an existing device in the system. SYCL also provides `cpu_selector`, `gpu_selector`, and allow you to customize your selector. In this example, we choose `default_selector` which let runtime picks for us.
 
 ### Setup Buffers
