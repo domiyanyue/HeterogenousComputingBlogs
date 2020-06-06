@@ -21,7 +21,7 @@ SYCL的设计在保留了OpenCL优点的同时，解决了OpenCL的以上问题�
 
 ## SYCL程序示例
 
-这部分中，我将通过一个向量加法应用的例子来讲解SYCL应用的基本结构。在阅读中，请将重点放在程序的总体架构上而不要纠结于实例代码中包含的诸多SYCL语言细节。 下面是完整的代码：
+这部分中，我将通过一个向量加法应用的例子来讲解SYCL应用的基本结构。在阅读中，请将重点放在程序的总体架构上而不要纠结于实例代码中包含的诸多SYCL语言细节。 以下是完整代码：
 
 ```C++
 #include <iostream>
@@ -67,9 +67,9 @@ int main() {
 }
 
 ```
-下面我们会对代码中的基本单元进行一一解读：
+下面我会对代码中的基本结构进行一一解读：
 
-### 使用SYCL头文件
+### 引用SYCL头文件
 ```C++
 #include <CL/sycl.hpp>
 
@@ -82,7 +82,7 @@ SYCL 程序必须包含 `CL/sycl.hpp`。其中包括了SYCL运行时需要的变
 ```C++
 default_selector device_selector;
 ```
-这一行代码声明并初始化了**设备选择器(device selector)** 。设备选择器用于指定SYCL程序运行的硬件。SYCL内置了一些类型，其中包括`cpu_selector`, `host_selector`, `host_selector` 和 `default_selector.` SYCL支持开发者定制的设备选择器来支持不同的硬件。本例中，我们使用类型 `default_selector`，SYCL运行时将自动决定使用的设备。
+这一行代码声明并初始化了**设备选择器(device selector)** 。设备选择器用于指定SYCL程序运行的硬件。SYCL内置了一些类型，其中包括`cpu_selector`, `host_selector`, `host_selector` 和 `default_selector.` SYCL支持开发者定制的设备选择器来支持不同的硬件。本例中，我们使用 `default_selector`，它表示SYCL运行时将自动决定使用的设备。
 
 
 ### 创建缓冲区(buffer)
@@ -94,7 +94,7 @@ default_selector device_selector;
       . . .
 }
 ```
-缓冲区(buffer)是SYCL引入的类型，用来表示在主机端(host)和设备端(device)间共享的内存。本例中，我们使用两个参数实例化了模板类buffer: 变量类型 `float` 和数据维度 `1` 。在buffer构造函数中，我们传入了数据源和数据量(ArraySize)。buffer类型支持直接从`std::vector`或`C数组`中传入数据。
+缓冲区(buffer)是SYCL中的重要类型，用来表示在主机端(host)和设备端(device)间共享的内存。本例中，我们使用两个参数实例化了模板类buffer: 变量类型 `float` 和数据维度 `1` 。在buffer构造函数中，我们传入了数据源和数据量(ArraySize)。buffer类型支持直接从`std::vector`或`C数组`中传入数据。
 这段代码的第一行，我们创建了一个一维浮点数大小为`ArraySize`的缓冲区，并用`vec_a`中的数据进行了初始化。
 
 这里需要注意的一点是buffer所在的作用域`{}`。在完整代码中`{`在buffer声名之前，`}`出现在打印结果前。作用域定义了`buffer`的存在区域(lifespan)。buffer在创建时被初始化，接管了vector中的数据。当代码执行到`}`时，buffer的析构函数(destructor)会自动将处理后的数据复制回`vec_a, vec_b, vec_c`中。
