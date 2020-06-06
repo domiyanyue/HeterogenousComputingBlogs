@@ -173,7 +173,7 @@ A kernel function is defined with 3 parts: data parallel model, kernel function 
 * 使用缓冲区(buffer)隐式地控制主机端和设备端之间的内存传输。
 * 实现一个包括内核函数(kernel function)的命令组(command group)，通过队列提交到设备上运行。
 
-这个例子同时体现了SYCL编程模型的一下势：
+这个例子同时体现了SYCL编程模型的以下优势：
 * **支持C++语言**： 模板，lambda表达式等现代C++特性可以在SYCL程序中使用。SYCL运行时接口的设计（包括queue, buffer）是都资源获取即初始化（RAII）类型，
 开发者不需要对资源的获取和释放进行显示的控制。
 * **单一源代码**：SYCL主机端代码和设备端代码可以存在于同一文件并使用同种语言编写。开发者再无需使用不同编译器分别编译，项目的管理和部属也变得更加简洁。
