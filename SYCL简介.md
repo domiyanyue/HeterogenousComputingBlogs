@@ -165,7 +165,6 @@ A kernel function is defined with 3 parts: data parallel model, kernel function 
 * 内核名：内核名称由`class VectorAdd` 定义。这里需要注意，内核名是一个类名，并需要在全局范围内声明。
 
 ## 总结
-## Summary
 
 在这篇教程中，我们通过一个简单的向量加法程序初步了解了SYCL程序的基本组成：
 * 将SYCL队列关联到指定设备。
