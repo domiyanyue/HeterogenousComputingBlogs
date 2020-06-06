@@ -1,27 +1,27 @@
 # SYCL 简介
 
 欢迎来到我的SYCL教程！ SYCL 是一套使用单一源代码的基于OpenCL实现的异构平台编程框架。SYCL的发明使开发者可以完全使用C++语言开在异构计算系统中开发。
-如果你对OpenCL很熟悉，你即将发现SYCL中的概念十分相似，并可以把关注点放在SYCL的新特性上。对OpenCL不熟悉的学习者也不必担心，这部教程不需要任何OpenCL知识作为学习基础。
+如果你对OpenCL很熟悉，你会发现SYCL中的概念与OpenCL十分相似，就可以把关注点放在SYCL的新特性上。对OpenCL不熟悉的学习者也不必担心，这部教程不需要任何OpenCL知识作为学习基础。
 
 ## 背景知识
 
-机构计算系统是指使用多种处理器架构的计算系统，其处理器组合可能是通用处理器(CPU), 图形处理器(GPU), 可编程逻辑阵列(FPGA), 专用信号处理器(DSP)中的多种组合。近年来(2010 -)摩尔定理进展的减速使以通用处理器(CPU)为核心的计算平台出现了速度瓶颈，异构计算平台成为许多计算密集型热门应用比如机器学习，图像处理，自然语言处理等的首选。
+异构计算系统是指使用多种处理器架构的计算系统，其处理器可能是通用处理器(CPU), 图形处理器(GPU), 可编程逻辑阵列(FPGA), 专用信号处理器(DSP)中的多种组合。近年来(2010 -)摩尔定理进展的减速使以通用处理器(CPU)为核心的计算平台出现了速度瓶颈，异构计算平台成为许多计算密集型热门应用的首选，比如机器学习，图像处理，自然语言处理等。
 
-异构系统编程需要基于异构编程模型，常见计算模型包括包括OpenCL, CUDA, OpenACC等。OpenCL得益于它明确定义的编程模型和易跨平台迁移的优点，得到了许多设备厂商的支持，拥有诸多用户。但是OpenCL有3点重要缺陷：
+异构系统编程需要基于异构编程模型，常见异构编程模型包括包括OpenCL, CUDA, OpenACC等。OpenCL得益于它定义清晰的编程模型和易跨平台迁移的优点，得到了许多设备厂商的支持，拥有诸多用户。但是，OpenCL有3点重要缺陷：
 
-1. 受限制的C++语言支持。OpenCL 是基于C99的语言，开发者们无法在其中使用现代C++的特性。
-2. 主机端(host)程序和设备端(device)程序的弱耦合机制让其开发过程十分容易出错。开发者需要使用两种不同语言进行开发并分别编译。在OpenCL开发环境中，开发者会编写一些字宗语言生成脚来去主机端和设备端的共享代码从而简化编程过程。
-3. OpenCL是一门低级语言(Low level Language), 需要开发者显示地表达主机端与设备端内存传输等低级操作，这使得代码变得冗长。
+1. 有限的C++语言支持。OpenCL 是基于C99的语言，开发者们无法在其中使用现代C++的特性。
+2. 主机端(host)程序和设备端(device)程序的弱耦合机制让其开发过程十分容易出错。开发者需要使用两种不同语言进行开发，且不得不使用额外的脚本去生成住机端和设备端的共享代码。
+3. OpenCL是一门低级语言(Low level Language), 需要开发者显示地表达主机端与设备端内存传输等低级操作，这使代码变得冗长。
 
-SYCL的设计在保留了OpenCL优点的同时，解决了OpenCL的以上问题：
-1. SYCL继承了OpenCL易迁移的执行模型。
+SYCL的设计在保留了OpenCL优点的同时，解决了以上问题：
+1. SYCL继承了OpenCL易迁移的编程模型。
 2. SYCL编程语言完全基于C++11并支持更高标准，开发者可以使用现代C++的特性。
-3. 使用了单一源代码的编程模型，无需对主机端和设备端代码区别对待。
-4. SYCL扩展了基于OpenCL的编程模型，可以使用更高级的抽象概念编程。         
+3. SYCL使用了单一源代码的编程模型，无需对主机端和设备端代码区别对待。
+4. SYCL扩展了基于OpenCL的编程模型，可以使用更高级的抽象概念(higher level abstraction)编程。         
 
 ## SYCL程序示例
 
-这部分中，我将通过一个向量加法应用的例子来讲解SYCL应用的基本结构。在阅读中，请将重点放在程序的总体架构上而不要纠结于实例代码中包含的诸多SYCL语言细节。 以下是完整代码：
+这部分中，我将通过一个向量加法的例子来讲解SYCL程序的基本结构。在阅读中，请将重点放在程序的总体架构上而不要纠结于实例代码中的诸多SYCL语言细节。 以下是完整代码：
 
 ```C++
 #include <iostream>
@@ -67,7 +67,7 @@ int main() {
 }
 
 ```
-下面我会对代码中的基本结构进行一一解读：
+下面我们来对代码中的基本结构进行详细解读：
 
 ### 引用SYCL头文件
 ```C++
@@ -76,13 +76,13 @@ int main() {
 using namespace cl::sycl;
 ```
 
-SYCL 程序必须包含 `CL/sycl.hpp`。其中包括了SYCL运行时需要的变量类型定义，包括queue, buffer, device 等。SYCL运行时类型定于都在命名空间 `cl::sycl `中。在本例中，为了代码的简介，我们加入了 `using namespace cl::sycl`.
+SYCL 程序必须包含 `CL/sycl.hpp`。这个头文件包括了SYCL运行时需要的变量类型定义，包括queue, buffer, device 等。SYCL运行时类型都定义在命名空间 `cl::sycl `中。在本例中，为了代码的简介，我们加入了 `using namespace cl::sycl`.
 
 ### 选择设备(device)
 ```C++
 default_selector device_selector;
 ```
-这一行代码声明并初始化了**设备选择器(device selector)** 。设备选择器用于指定SYCL程序运行的硬件。SYCL内置了一些类型，其中包括`cpu_selector`, `host_selector`, `host_selector` 和 `default_selector.` SYCL支持开发者定制的设备选择器来支持不同的硬件。本例中，我们使用 `default_selector`，它表示SYCL运行时将自动决定使用的设备。
+这一行代码声明并初始化了**设备选择器(device selector)** 。设备选择器用于指定SYCL程序运行的硬件。SYCL内置了一些针对不同硬件的设备选择器，包括`cpu_selector`, `gpu_selector`, `host_selector` 和 `default_selector.` 除此之外，SYCL也支持开发者定制新的设备选择器来支持新的硬件。本例中，我们使用 `default_selector`，它表示SYCL运行时将自动决定使用的设备。
 
 
 ### 创建缓冲区(buffer)
@@ -94,15 +94,15 @@ default_selector device_selector;
       . . .
 }
 ```
-缓冲区(buffer)是SYCL中的重要类型，用来表示在主机端(host)和设备端(device)间共享的内存。本例中，我们使用两个参数实例化了模板类buffer: 变量类型 `float` 和数据维度 `1` 。在buffer构造函数中，我们传入了数据源和数据量(ArraySize)。buffer类型支持直接从`std::vector`或`C数组`中传入数据。
+缓冲区(buffer)是SYCL中的一个重要类型，用来表示在主机端(host)和设备端(device)间共享的内存。本例中，我们使用两个参数实例化了模板类buffer: 变量类型 `float` 和数据维度 `1` 。在buffer构造函数中，我们传入了数据源和数据量(ArraySize)。buffer类型支持直接从`std::vector`或`C数组`中传入数据。
 这段代码的第一行，我们创建了一个一维浮点数大小为`ArraySize`的缓冲区，并用`vec_a`中的数据进行了初始化。
 
 这里需要注意的一点是buffer所在的作用域`{}`。在完整代码中`{`在buffer声名之前，`}`出现在打印结果前。作用域定义了`buffer`的存在区域(lifespan)。buffer在创建时被初始化，接管了vector中的数据。当代码执行到`}`时，buffer的析构函数(destructor)会自动将处理后的数据复制回`vec_a, vec_b, vec_c`中。
-内存在主机端和设备端的转移是有buffer的构造函数和析构函数隐式的控制的。
+内存在主机端和设备端的转移是由buffer的构造函数和析构函数隐式的控制的。
 
 ### 构造命令组(command group)
 
-命令组(command group)是一组在设备端运行的代码，在本例中，指令组以仿函数 (functor)的形式传入`submit`函数。指令组的仿函数需要接受参数`handler`，`handler` 由SYCL运行时创建，开发者将使用他来访问命令组(command group)中的程序接口(API)。
+命令组(command group)是一组在设备端运行的代码，SYCL中设备端运行代码必须写在命令组中。在本例中，命令组以仿函数 (functor)的形式作为参数传入`submit`函数。命令组的仿函数需要接受参数`handler`，`handler` 由SYCL运行时创建，开发者将使用他来访问命令组(command group)中的程序接口(API)。
 
 ```C++
       queue.submit([&] (handler& cgh) { // 指令组 (command group) 开始
