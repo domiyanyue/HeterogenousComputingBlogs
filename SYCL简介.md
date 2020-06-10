@@ -27,9 +27,9 @@ SYCL的设计在保留了OpenCL优点的同时，解决了以上问题：
 ### 主机端
 在主机端程序中，除了完成正常CPU的运算，还需要与设备端程序进行交互，常见的操作有：
 1. **配置运行时环境** 为与设备端交互做准备的，比如创建代表具体设备的实例，创建与内存单元共享的内存等。在大部分框架中，运行时中的变量类型（设备，内存）以头文件内置类或者语言语法特性的方式提供。
-2. **选择要使用的设备** 配置环境中的重要操作，开发者通过API指定程序执行的设备。
-3. **创建与设备共享的内存** 大部分设备中的数据需要从主机端程序中传入，当运算结束是，主机端需要从设备端拷贝结果。共享内存一般一类似数组的变量类型的方式存在。
-4. **指定在设备端运行的代码** 开发者需要显示告诉系统哪些代码在设备端执行。
+2. **选择设备** 配置环境中的重要操作，开发者通过API指定程序执行的设备。
+3. **创建与设备共享的内存** 大部分设备中的数据需要从主机端程序中传入，当运算结束时，主机端需要从设备端拷贝结果。共享内存一般一类似数组的变量类型的方式存在。
+4. **指定设备端代码** 开发者需要显示告诉系统哪些代码在设备端执行。
 5. **提交设备端代码** 有了设备端代码，主机端还需要通知设备什么时候开始执行。一般的架构中，这个操作通过一个显示或隐式的队列完成，一组设备端代码会被"任务"的性质提交到主机端与设备端通信的队列，当设备端有足够的计算资源时，会获取并执行队列中任务。
 
 ### 设备端
@@ -39,7 +39,7 @@ SYCL的设计在保留了OpenCL优点的同时，解决了以上问题：
 
 ## SYCL程序示例
 
-这部分中，我将通过一个向量加法的例子结合上一节内容来讲解SYCL程序的基本结构。在学习中，读者不必纠结于代码中的诸多SYCL语言细节，这些内容将在五i后的教程中详细讲解。 以下是完整代码：
+这部分中，我将通过一个向量加法的例子结合上一节内容来讲解SYCL程序的基本结构。在学习中，读者不必纠结于代码中的诸多SYCL语言细节，这些内容将在随后的教程中详细讲解。 以下是完整代码：
 
 ```C++
 #include <iostream>
@@ -100,7 +100,7 @@ using namespace cl::sycl;
 ```C++
 default_selector device_selector;
 ```
-这一行代码声明并初始化了**设备选择器(device selector)** 。设备选择器用于指定SYCL程序运行的硬件。SYCL内置了一些针对不同硬件的设备选择器，包括`cpu_selector`, `gpu_selector`, `host_selector` 和 `default_selector.` 除此之外，SYCL也支持开发者定制新的设备选择器来支持新的硬件。本例中，我们使用 `default_selector`，它表示SYCL运行时将自动决定使用的设备。
+这一行代码声明并初始化了**设备选择器(device selector)** 。设备选择器用于*选择设备*。SYCL内置了一些针对不同硬件的设备选择器，包括`cpu_selector`, `gpu_selector`, `host_selector` 和 `default_selector.` 除此之外，SYCL也支持开发者定制新的设备选择器来支持新的硬件。本例中，我们使用 `default_selector`，它表示SYCL运行时将自动决定使用的设备。
 
 
 ### 创建缓冲区(buffer)
@@ -112,7 +112,7 @@ default_selector device_selector;
       . . .
 }
 ```
-缓冲区(buffer)是SYCL中的一个重要类型，用来表示在主机端(host)和设备端(device)间共享的内存。本例中，我们使用两个参数实例化了模板类buffer: 变量类型 `float` 和数据维度 `1` 。在buffer构造函数中，我们传入了数据源和数据量(ArraySize)。buffer类型支持直接从`std::vector`或`C数组`中传入数据。
+这段代码展示了在SYCL中*创建与设备共享的内存*。 缓冲区(buffer)是SYCL中的一个重要类型，用来表示在主机端(host)和设备端(device)间共享的内存。本例中，我们使用两个参数实例化了模板类buffer: 变量类型 `float` 和数据维度 `1` 。在buffer构造函数中，我们传入了数据源和数据量(ArraySize)。buffer类型支持直接从`std::vector`或`C数组`中传入数据。
 这段代码的第一行，我们创建了一个一维浮点数大小为`ArraySize`的缓冲区，并用`vec_a`中的数据进行了初始化。
 
 这里需要注意的一点是buffer所在的作用域`{}`。在完整代码中`{`在buffer声名之前，`}`出现在打印结果前。作用域定义了`buffer`的存在区域(lifespan)。buffer在创建时被初始化，接管了vector中的数据。当代码执行到`}`时，buffer的析构函数(destructor)会自动将处理后的数据复制回`vec_a, vec_b, vec_c`中。
@@ -120,7 +120,7 @@ default_selector device_selector;
 
 ### 构造命令组(command group)
 
-命令组(command group)是一组在设备端运行的代码，SYCL中设备端运行代码必须写在命令组中。在本例中，命令组以仿函数 (functor)的形式作为参数传入`submit`函数。命令组的仿函数需要接受参数`handler`，`handler` 由SYCL运行时创建，开发者将使用他来访问命令组(command group)中的程序接口(API)。
+命令组(command group)用于*指定设备端代码*，SYCL中设备端运行代码必须写在命令组中。在本例中，命令组以仿函数 (functor)的形式作为参数传入`queue.submit`函数。命令组的仿函数需要接受参数`handler`，`handler` 由SYCL运行时创建，开发者将使用他来访问命令组(command group)中的程序接口(API)。
 
 ```C++
       queue.submit([&] (handler& cgh) { // 指令组 (command group) 开始
@@ -135,9 +135,7 @@ default_selector device_selector;
          }); // 指令组 (command group)结束
       });
 ```
-命令组(command group)包含两部分：
-* **内核函数(kernel function)** : 内核函数以仿函数(functor)的形式存在于enqueue API `parallel_for`中。在下文中我们将介绍函数的组成。
-* **输入和输出(inputs and outputs)** ：内核函数的输入输出由**存取器(accessor)** 定义，存取器在内核函数中用于访问内存。下文中将单独介绍存取器。
+命令组(command group)包含**内核函数(kernel function)** 和 **内存存取器定义(accessors definition)** 。在下文中我们将具体介。
 
 
 ### 创建命令队列(command queue)并提交命令组(command group)
