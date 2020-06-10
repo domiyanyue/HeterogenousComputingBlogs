@@ -149,9 +149,9 @@ default_selector device_selector;
 ```
 上例展示了如何在SYCL中创建命令队列(command queue)并*提交设备端代码*。我们定义了一个于设备`device_selectr`关联的`queue`实例。设备端代码以命令组的形式被提交。SYCL中的命令队列提交是异步操作，这行代码在执行时会立即返回，命令组随后会在设备端运行。
 
-### 使用存取器(accessor)
+### 存取器(accessor)
 
-**存取器(accessor)** 是SYCL中专门用于访问缓冲区(buffer)的类型。本例中，它们在命令组(command group)中使用来访问缓冲区中的全局内存(global memory)。
+**存取器(accessor)** 是SYCL中用于访问缓冲区(buffer)的类型。设备端*内存存取器定义* 必须存在于命令组(command group)中。本例中，它们用来访问缓冲区中的全局内存(global memory)。
 
 ```C++
          auto a_acc = a_sycl.get_access<access::mode::read>(cgh);
@@ -159,26 +159,23 @@ default_selector device_selector;
          auto c_acc = c_sycl.get_access<access::mode::write>(cgh);
 ```
 
-获取访问某个缓冲区的常用方式是`<缓冲区变量>.get_access` ，该函数将返回一个存取器。存取器有三个重要的属性：
+`<缓冲区变量>.get_access` 将返回一个存取器。存取器有三个重要的属性：
 1. **缓冲区**：可以访问的内存，在创建时指定。
 2. **存取方式**：以模板参数的形式传入，常见的值包括read, write, read_write。存取方式有助于编译器优化内存访问。
 3. **命令组handler**: 参数`cgh`表示存取器可以在这个命令组(command group)中的内核函数中(kernel function)使用。
 
 
-### 实现内核函数(Kernel Function)
+### 内核函数(Kernel Function)
 
-内核函数由三部分组成：数据并行模型(data parallel model), 函数体(function body)以及内核名(kernel name).  
-A kernel function is defined with 3 parts: data parallel model, kernel function body and kernel name. 
+内核函数定义同样在命令组(command group)中：
 ```C++
          cgh.parallel_for<class VectorAdd>(range<1>(ArraySize), [=] (item<1> item) {
             c_acc[item] = a_acc[item] + b_acc[item];
          });
 ```
-
-* 数据并行模型: 据并行模型由代码中的`parallel_for`和参数`range`的类型共同决定。本例中，数据并行模型是**基本数据并行模型(basic data parallel model)** ，这类模型将执行多个相互间不同部的 **工作项/线程(work-item/thread)** 。其他的数据并行模型包括**工作组数据并行(work-group data parallel)**, **单任务(single task)**, **等级制数据并行(hierarchical data parallel)**.
-
-* 函数体: 函数体由仿函数(functor)形式表达，
-
+在SYCL中，内核函数由三部分组成：数据并行模型(data parallel model), 函数体(function body)以及内核名(kernel name).  
+* 数据并行模型: 据并行模型由代码中的`parallel_for`和参数`range`的类型共同决定。本例中，数据并行模型是**基本数据并行模型(basic data parallel model)** ，这类模型将执行多个相互间不同步的 **工作项/线程(work-item/thread)** 。其他的数据并行模型包括**工作组数据并行(work-group data parallel)**, **单任务(single task)**, **等级制数据并行(hierarchical data parallel)**.
+* 函数体: 函数体由仿函数(functor)形式表达，其参数列表由数据并行模型决定，本例中为`cl::sycl::item`。这个参数可以用作线程ID来使得不同线程访问不同数据。函数体从accessor`a_acc`和b`_acc`中读取数据，计算其和，并存储在`c_acc`中。
 * 内核名：内核名称由`class VectorAdd` 定义。这里需要注意，内核名是一个类名，并需要在全局范围内声明。
 
 ## 总结
