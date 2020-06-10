@@ -147,8 +147,7 @@ default_selector device_selector;
     ...
     }
 ```
-命令队列(command queue)在SYCL中用于向设备端提交命令组(command group)。上例中，我们定义了一个`queue`实例并传入`device_selectr`作为设备参数。
-下一行中，指令组被提交(submit)，SYCL中的命令队列提交是异步操作，这行代码在执行时会立即返回，命令组随后会在设备端运行。
+上例展示了如何在SYCL中创建命令队列(command queue)并*提交设备端代码*。我们定义了一个于设备`device_selectr`关联的`queue`实例。设备端代码以命令组的形式被提交。SYCL中的命令队列提交是异步操作，这行代码在执行时会立即返回，命令组随后会在设备端运行。
 
 ### 使用存取器(accessor)
 
