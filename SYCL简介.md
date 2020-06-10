@@ -175,7 +175,7 @@ default_selector device_selector;
 ```
 在SYCL中，内核函数由三部分组成：数据并行模型(data parallel model), 函数体(function body)以及内核名(kernel name).  
 * 数据并行模型: 据并行模型由代码中的`parallel_for`和参数`range`的类型共同决定。本例中，数据并行模型是**基本数据并行模型(basic data parallel model)** ，这类模型将执行多个相互间不同步的 **工作项/线程(work-item/thread)** 。其他的数据并行模型包括**工作组数据并行(work-group data parallel)**, **单任务(single task)**, **等级制数据并行(hierarchical data parallel)**.
-* 函数体: 函数体由仿函数(functor)形式表达，其参数列表由数据并行模型决定，本例中为`cl::sycl::item`。这个参数可以用作线程ID来使得不同线程访问不同数据。函数体从accessor`a_acc`和b`_acc`中读取数据，计算其和，并存储在`c_acc`中。
+* 函数体: 函数体由仿函数(functor)形式表达，其参数列表由数据并行模型决定，本例中为`cl::sycl::item`。这个参数的类型和使用方法不是本文的重点，读者只需知道这个参数在每个线程中有不同的值，可以用作ID来访问不同数据。本例中我们从accessor`a_acc`和b`_acc`中读取数据，计算其和，并存储在`c_acc`中。
 * 内核名：内核名称由`class VectorAdd` 定义。这里需要注意，内核名是一个类名，并需要在全局范围内声明。
 
 ## 总结
@@ -183,7 +183,7 @@ default_selector device_selector;
 在这篇教程中，我们通过一个简单的向量加法程序初步了解了SYCL程序的基本组成：
 * 将SYCL队列关联到指定设备。
 * 使用缓冲区(buffer)隐式地控制主机端和设备端之间的内存传输。
-* 实现一个包括内核函数(kernel function)的命令组(command group)，通过队列提交到设备上运行。
+* 在命令组(command group)定义存取器(accessor)和内核函数(kernel function)，通过队列提交到设备上运行。
 
 这个例子同时体现了SYCL编程模型的以下优势：
 * **支持C++语言**： 模板，lambda表达式等现代C++特性可以在SYCL程序中使用。SYCL运行时接口的设计（包括queue, buffer）是都资源获取即初始化（RAII）类型，
