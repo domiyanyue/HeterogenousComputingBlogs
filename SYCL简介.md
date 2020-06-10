@@ -39,7 +39,7 @@ SYCL的设计在保留了OpenCL优点的同时，解决了以上问题：
 
 ## SYCL程序示例
 
-这部分中，我将通过一个向量加法的例子来讲解SYCL程序的基本结构。在学习中，读者不必纠结于代码中的诸多SYCL语言细节，这些内容将在五i后的教程中详细讲解。 以下是完整代码：
+这部分中，我将通过一个向量加法的例子结合上一节内容来讲解SYCL程序的基本结构。在学习中，读者不必纠结于代码中的诸多SYCL语言细节，这些内容将在五i后的教程中详细讲解。 以下是完整代码：
 
 ```C++
 #include <iostream>
@@ -94,7 +94,7 @@ int main() {
 using namespace cl::sycl;
 ```
 
-SYCL 程序必须包含 `CL/sycl.hpp`。这个头文件包括了SYCL运行时需要的变量类型定义，包括queue, buffer, device 等。SYCL运行时类型都定义在命名空间 `cl::sycl `中。在本例中，为了代码的简介，我们加入了 `using namespace cl::sycl`.
+开发者需要引用 `CL/sycl.hpp` 来*配置运行时环境*。这个头文件包括了SYCL运行时需要的变量类型定义，包括queue, buffer, device 等。SYCL运行时类型都定义在命名空间 `cl::sycl `中。在本例中，为了代码的简介，我们加入了 `using namespace cl::sycl`.
 
 ### 选择设备(device)
 ```C++
