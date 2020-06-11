@@ -155,7 +155,7 @@ default_selector device_selector;
 
 #### 存取器(accessor)
 
-**存取器(accessor)** 是SYCL中用于访问缓冲区(buffer)的类型。本例中，它们用来访问缓冲区中的全局内存(global memory)。
+存取器是SYCL中用于访问缓冲区(buffer)的类型。本例中，它们用来访问缓冲区中的全局内存(global memory)。
 
 ```C++
          auto a_acc = a_sycl.get_access<access::mode::read>(cgh);
