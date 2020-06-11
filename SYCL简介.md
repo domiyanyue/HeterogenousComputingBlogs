@@ -85,9 +85,11 @@ int main() {
 }
 
 ```
-下面我们来对代码中的基本结构进行详细解读：
+下面我们将分别对主机端和设备端代码进行解读。
 
-### 引用SYCL头文件
+### 主机端代码
+
+#### 引用SYCL头文件
 ```C++
 #include <CL/sycl.hpp>
 
@@ -96,14 +98,14 @@ using namespace cl::sycl;
 
 开发者需要引用 `CL/sycl.hpp` 来*配置运行时环境*。这个头文件包括了SYCL运行时需要的变量类型定义，包括queue, buffer, device 等。SYCL运行时类型都定义在命名空间 `cl::sycl `中。在本例中，为了代码的简介，我们加入了 `using namespace cl::sycl`.
 
-### 选择设备(device)
+#### 选择设备(device)
 ```C++
 default_selector device_selector;
 ```
 这一行代码声明并初始化了**设备选择器(device selector)** 。SYCL内置了一些针对不同硬件的设备选择器，包括`cpu_selector`, `gpu_selector`, `host_selector` 和 `default_selector.` 除此之外，SYCL也支持开发者定制新的设备选择器来支持新的硬件。本例中，我们使用 `default_selector`，它表示SYCL运行时将自动决定使用的设备。
 
 
-### 创建缓冲区(buffer)
+#### 创建缓冲区(buffer)
 ```C++
 {
       buffer<float, 1> a_sycl(vec_a.data(), ArraySize);
@@ -118,7 +120,7 @@ default_selector device_selector;
 这里需要注意的一点是buffer所在的作用域`{}`。在完整代码中`{`在buffer声名之前，`}`出现在打印结果前。作用域定义了`buffer`的存在区域(lifespan)。buffer在创建时被初始化，接管了vector中的数据。当代码执行到`}`时，buffer的析构函数(destructor)会自动将处理后的数据复制回`vec_a, vec_b, vec_c`中。
 内存在主机端和设备端的转移是由buffer的构造函数和析构函数隐式地控制的。
 
-### 构造命令组(command group)
+#### 构造命令组(command group)
 
 命令组(command group)用于*指定设备端代码*，SYCL中设备端运行代码必须写在命令组中。在本例中，命令组以仿函数 (functor)的形式作为参数传入`queue.submit`函数。命令组的仿函数需要接受参数`handler`，`handler` 由SYCL运行时创建，开发者将使用他来访问命令组(command group)中的程序接口(API)。
 
@@ -137,8 +139,7 @@ default_selector device_selector;
 ```
 命令组(command group)包含**内核函数(kernel function)** 和 **内存存取器定义(accessors definition)** 。在下文中我们将具体介。
 
-
-### 创建命令队列(command queue)并提交命令组(command group)
+#### 创建命令队列(command queue)并提交命令组(command group)
 
 ```C++
 ...
@@ -149,7 +150,10 @@ default_selector device_selector;
 ```
 上例展示了如何在SYCL中创建命令队列(command queue)并*提交设备端代码*。我们定义了一个与设备`device_selectr`关联的`queue`实例。设备端代码以命令组的形式被提交。SYCL中的命令队列提交是异步操作，这行代码在执行时会立即返回，命令组随后会在设备端运行。
 
-### 存取器(accessor)
+### 设备端代码
+在本例中，设备端代码全部存在于命令组中。
+
+#### 存取器(accessor)
 
 **存取器(accessor)** 是SYCL中用于访问缓冲区(buffer)的类型。设备端*内存存取器定义* 必须存在于命令组(command group)中。本例中，它们用来访问缓冲区中的全局内存(global memory)。
 
@@ -165,7 +169,7 @@ default_selector device_selector;
 3. **命令组handler**: 参数`cgh`表示存取器可以在这个命令组(command group)中的内核函数中(kernel function)使用。
 
 
-### 内核函数(Kernel Function)
+#### 内核函数(Kernel Function)
 
 内核函数定义同样在命令组(command group)中：
 ```C++
