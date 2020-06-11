@@ -179,9 +179,9 @@ buffer地成员函数 `get_access` (`a_sycl.get_access`, `b_sycl.get_acess`, `c_
 ```
 内核函数是运行在设备端的函数。常见的编程语言中，函数由两部分组成函数名(function name)和函数体(function body), 其中函数体包括了参数列表。
 在SYCL中，内核函数由三部分组成：数据并行模型(data parallel model), 函数体(function body)以及内核名(kernel name). 
-* 数据并行模型: 数据并行模型定义了该函数将以何种并行方式在设备端运行，在之后的教程中我们将详细介绍。数据并行模型由代码中的`cgh.parallel_for<class VectorAdd>(range<1>(ArraySize)` 决定，本例中的数据并行模型是**基本数据并行模型(basic data parallel model)** ，这类模型将执行多个相互间不同步的 **工作项/线程(work-item/thread)** 。其他的数据并行模型包括**工作组数据并行(work-group data parallel)**, **单任务(single task)**, **等级制数据并行(hierarchical data parallel)**.
+* 数据并行模型: 数据并行模型定义了该函数将以何种并行方式在设备端运行，在之后的教程中我们将详细介绍。数据并行模型由代码中的`cgh.parallel_for<class VectorAdd>(range<1>(ArraySize)` 决定，本例中的数据并行模型是**基本数据并行模型(basic data parallel model)** , 多个线程(thread)将并行的执行函数体中的代码。其他的数据并行模型包括**工作组数据并行(work-group data parallel)**, **单任务(single task)**, **等级制数据并行(hierarchical data parallel)**.
 
-* 函数体: 函数体由仿函数(functor)形式表达。其参数列表由数据并行模型决定，本例中为`cl::sycl::item`。关于数据并行，读者只需知道这个参数在每个线程中有不同的值，可以用作ID来访问不同数据。本例中我们从存取器`a_acc`和b`_acc`中读取数据，计算其和，并存储在`c_acc`中。
+* 函数体: 函数体由仿函数(functor)形式表达：`[=] (item<1> item) {c_acc[item] = a_acc[item] + b_acc[item];}` 其参数列表`(item<1> item)`由数据并行模型决定。读者这里只需知道这个参数`item`在每个线程中有不同的值，可以用作ID来访问不同地址的数据。本例中我们从存取器`a_acc`和b`_acc`中读取数据，计算其和，并存储在`c_acc`中。
 
 * 内核名：内核名称由`class VectorAdd` 定义。这里需要注意，内核名是一个类名，并需要在全局范围内声明。
 
