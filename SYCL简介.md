@@ -163,10 +163,10 @@ default_selector device_selector;
          auto c_acc = c_sycl.get_access<access::mode::write>(cgh);
 ```
 
-`<缓冲区变量>.get_access` 将返回一个存取器。存取器有三个重要的属性：
-1. **缓冲区**：可以访问的内存，在创建时指定。
-2. **存取方式**：以模板参数的形式传入，常见的值包括read, write, read_write。存取方式有助于编译器优化内存访问。
-3. **命令组handler**: 参数`cgh`表示存取器可以在这个命令组(command group)中的内核函数中(kernel function)使用。
+buffer地成员函数 `get_access` (`a_sycl.get_access`, `b_sycl.get_acess`, `c_sycl.get_access`) 将返回存取器。存取器有三个重要的属性, 我们以第一行代码 `auto a_acc = a_sycl.get_access<access::mode::read>(cgh)` 进行讲解：
+1. **缓冲区 (a_sycl)** ：可以访问的内存，在创建时指定。
+2. **存取方式 (access::mode::read)** ：以模板参数的形式传入，常见的值包括read, write, read_write。存取方式有助于编译器优化内存访问。
+3. **命令组handler (cgh)** : 参数`cgh`表示存取器可以在这个命令组(command group)中的内核函数中(kernel function)使用。
 
 
 #### 内核函数(Kernel Function)
