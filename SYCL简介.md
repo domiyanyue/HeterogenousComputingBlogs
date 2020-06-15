@@ -55,7 +55,7 @@ int main() {
    std::vector<float> vec_b{5.0f, 6.0f, 7.0f, 8.0f};
    std::vector<float> vec_c(ArraySize);
 
-   default_selector device_selector;
+   cpu_selector device_selector;
 
    queue queue(device_selector);
    std::cout << "Running on "
@@ -100,9 +100,9 @@ using namespace cl::sycl;
 
 #### 选择设备(device)
 ```C++
-default_selector device_selector;
+cpu_selector device_selector;
 ```
-这一行代码声明并初始化了**设备选择器(device selector)** 。SYCL内置了一些针对不同硬件的设备选择器，包括`cpu_selector`, `gpu_selector`, `host_selector` 和 `default_selector.` 除此之外，SYCL也支持开发者定制新的设备选择器来支持新的硬件。本例中，我们使用 `default_selector`，它表示SYCL运行时将自动决定使用的设备。
+这一行代码声明并初始化了**设备选择器(device selector)** 。SYCL内置了一些针对不同硬件的设备选择器，包括`cpu_selector`, `gpu_selector`, `host_selector` 和 `default_selector.` 除此之外，SYCL也支持开发者定制新的设备选择器来支持新的硬件。本例中，我们使用 `cpu_selector`，它表示SYCL运行时将使用CPU执行设备端代码。
 
 #### 创建缓冲区(buffer)
 ```C++
